@@ -4,14 +4,17 @@
   "description": "Servidor backend - Proyecto UBBShop",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
   },
   "author": "Sebastian Salgado, Renato Duran, Paula Mellado.",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^2.2.0",
     "express": "^5.1.0",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
