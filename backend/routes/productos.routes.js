@@ -6,6 +6,39 @@ const fs = require('fs');
 
 const pool = require('../db');
 
+// Tablas y columnas según la base de datos `proyectoangular`
+const TABLA_PRODUCTO = 'producto';
+const TABLA_IMAGEN_PRODUCTO = 'imagen_producto';
+
+// Mapeo de los nombres que llegan del front-end a los nombres reales de columnas
+function mapearAColumnasBD(body) {
+  return {
+    titulo: body.titulo,
+    id_categorias: body.categoria_id,
+    descripcion: body.descripcion,
+    precio: body.precio,
+    informacion_contacto: body.info_contacto,
+    id_usuario: body.usuario_id,
+    ...(body.esta_activo !== undefined ? { activo: body.esta_activo } : {}),
+  };
+}
+
+// Convierte un registro de BD a la forma esperada por el front-end
+function mapearAFrontEnd(reg) {
+  return {
+    id: reg.id_producto,
+    categoria_id: reg.id_categorias,
+    titulo: reg.titulo,
+    descripcion: reg.descripcion,
+    precio: reg.precio,
+    info_contacto: reg.informacion_contacto,
+    usuario_id: reg.id_usuario,
+    esta_activo: reg.activo,
+    fecha_creacion: reg.fecha_creacion,
+    fecha_modificacion: reg.fecha_modificacion,
+  };
+}
+
 // Configuración de almacenamiento de imágenes
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -36,9 +69,12 @@ router.post('/', upload.array('imagenes', 5), (req, res) => {
     return res.status(400).json({ mensaje: 'Todos los campos son obligatorios' });
   }
 
-  const producto = { titulo, categoria_id, descripcion, precio, info_contacto, usuario_id, esta_activo: 1 };
+  const producto = {
+    ...mapearAColumnasBD({ titulo, categoria_id, descripcion, precio, info_contacto, usuario_id }),
+    activo: 1,
+  };
 
-  pool.query('INSERT INTO productos SET ?', producto, (err, result) => {
+  pool.query(`INSERT INTO \`${TABLA_PRODUCTO}\` SET ?`, producto, (err, result) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ mensaje: 'Error al crear producto' });
@@ -50,7 +86,7 @@ router.post('/', upload.array('imagenes', 5), (req, res) => {
     const archivos = req.files || [];
     if (archivos.length) {
       const registrosImagenes = archivos.map((file) => [productoId, `/uploads/${file.filename}`]);
-      pool.query('INSERT INTO imagenes_producto (producto_id, url_imagen) VALUES ?', [registrosImagenes], (err2) => {
+      pool.query(`INSERT INTO \`${TABLA_IMAGEN_PRODUCTO}\` (id_producto, imagen_url) VALUES ?`, [registrosImagenes], (err2) => {
         if (err2) {
           console.error(err2);
         }
@@ -64,19 +100,20 @@ router.post('/', upload.array('imagenes', 5), (req, res) => {
 // Obtener publicaciones de un usuario
 router.get('/usuario/:usuarioId', (req, res) => {
   const { usuarioId } = req.params;
-  pool.query('SELECT * FROM productos WHERE usuario_id = ?', [usuarioId], (err, results) => {
+  pool.query(`SELECT * FROM \`${TABLA_PRODUCTO}\` WHERE id_usuario = ?`, [usuarioId], (err, results) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ mensaje: 'Error al obtener publicaciones' });
     }
-    res.json(results);
+    const respuesta = results.map(mapearAFrontEnd);
+    res.json(respuesta);
   });
 });
 
 // Obtener un producto por id (con imágenes)
 router.get('/:id', (req, res) => {
   const { id } = req.params;
-  pool.query('SELECT * FROM productos WHERE id = ?', [id], (err, productos) => {
+  pool.query(`SELECT * FROM \`${TABLA_PRODUCTO}\` WHERE id_producto = ?`, [id], (err, productos) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ mensaje: 'Error al obtener producto' });
@@ -84,12 +121,12 @@ router.get('/:id', (req, res) => {
     if (!productos.length) {
       return res.status(404).json({ mensaje: 'Producto no encontrado' });
     }
-    const producto = productos[0];
-    pool.query('SELECT url_imagen FROM imagenes_producto WHERE producto_id = ?', [id], (err2, imagenes) => {
+    const producto = mapearAFrontEnd(productos[0]);
+    pool.query(`SELECT imagen_url FROM \`${TABLA_IMAGEN_PRODUCTO}\` WHERE id_producto = ?`, [id], (err2, imagenes) => {
       if (err2) {
         console.error(err2);
       }
-      producto.imagenes = imagenes.map((i) => i.url_imagen);
+      producto.imagenes = imagenes.map((i) => i.imagen_url);
       res.json(producto);
     });
   });
@@ -100,8 +137,11 @@ router.put('/:id', upload.array('imagenes', 5), (req, res) => {
   const { id } = req.params;
   const { titulo, categoria_id, descripcion, precio, info_contacto, esta_activo } = req.body;
 
-  const data = { titulo, categoria_id, descripcion, precio, info_contacto, esta_activo };
-  pool.query('UPDATE productos SET ? WHERE id = ?', [data, id], (err) => {
+  let data = mapearAColumnasBD({ titulo, categoria_id, descripcion, precio, info_contacto, esta_activo });
+  // Quitar propiedades undefined para no sobreescribir con NULL/undefined
+  Object.keys(data).forEach((k) => data[k] === undefined && delete data[k]);
+
+  pool.query(`UPDATE \`${TABLA_PRODUCTO}\` SET ? WHERE id_producto = ?`, [data, id], (err) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ mensaje: 'Error al actualizar producto' });
@@ -111,7 +151,7 @@ router.put('/:id', upload.array('imagenes', 5), (req, res) => {
     const archivos = req.files || [];
     if (archivos.length) {
       const registrosImagenes = archivos.map((file) => [id, `/uploads/${file.filename}`]);
-      pool.query('INSERT INTO imagenes_producto (producto_id, url_imagen) VALUES ?', [registrosImagenes], (err2) => {
+      pool.query(`INSERT INTO \`${TABLA_IMAGEN_PRODUCTO}\` (id_producto, imagen_url) VALUES ?`, [registrosImagenes], (err2) => {
         if (err2) {
           console.error(err2);
         }
@@ -126,9 +166,9 @@ router.put('/:id', upload.array('imagenes', 5), (req, res) => {
 router.delete('/:id', (req, res) => {
   const { id } = req.params;
 
-  pool.query('DELETE FROM imagenes_producto WHERE producto_id = ?', [id], (err) => {
+  pool.query(`DELETE FROM \`${TABLA_IMAGEN_PRODUCTO}\` WHERE id_producto = ?`, [id], (err) => {
     if (err) console.error(err);
-    pool.query('DELETE FROM productos WHERE id = ?', [id], (err2) => {
+    pool.query(`DELETE FROM \`${TABLA_PRODUCTO}\` WHERE id_producto = ?`, [id], (err2) => {
       if (err2) {
         console.error(err2);
         return res.status(500).json({ mensaje: 'Error al eliminar producto' });

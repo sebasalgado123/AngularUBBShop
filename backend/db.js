@@ -1,14 +1,28 @@
-const mysql = require('mysql');
+require('dotenv').config();
+const mysql = require('mysql2');
 
-// Configuración de conexión - ajusta según tu entorno
+// Configuración de conexión
 const pool = mysql.createPool({
   connectionLimit: 10,
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASS || '',
-  database: process.env.DB_NAME || 'ubbshop',
-  port: process.env.DB_PORT || 3306,
-  timezone: 'Z'
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT,
+  timezone: 'Z',
+  ssl: {
+    rejectUnauthorized: false // Necesario para Railway
+  }
+});
+
+// Probar la conexión
+pool.getConnection((err, connection) => {
+  if (err) {
+    console.error('Error al conectar con la base de datos:', err);
+    return;
+  }
+  console.log('Conexión a la base de datos establecida correctamente');
+  connection.release();
 });
 
 module.exports = pool; 
