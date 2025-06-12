@@ -1,0 +1,46 @@
+<!--Tabla HTML-->
+<div class="card border-primary mb-3 text-center">
+    <div class="card-header">Lista de Productos</div>
+    <div class="card-body text-primary">
+      <div class="table-responsive">
+        <table class="table" *ngIf="products && products.length">
+          <thead>
+            <tr>
+              <th>
+                <button class="btn btn-primary" (click)="toggleImage()">
+                  <i class="fa fa-eye"></i>
+                  {{showImage ? 'Ocultar ' : 'Mostrar '}}Imagenes
+                </button>      
+              </th>
+              <th>Producto</th>
+              <th>Descripcion</th>
+              <th>Precio</th>
+              <th>Contacto</th>
+              <th>Disponibilidad</th>
+              <th>Fecha publicacion</th>
+              <th>Ultima modificacion</th>
+            </tr>
+          </thead>
+          <thead>
+            <tr *ngFor="let product of products">
+              <td>
+                <img *ngIf="showImage"
+                [src]='product.imageUrl'
+                [title]='product.titulo'
+                [style.width.px]='imageWidth'
+                [style.margin.px]='imageMargin'
+                >
+              </td>
+              <td>{{product.titulo}}</td>
+              <td>{{product.descripcion}}</td>
+              <td>{{product.precio}}</td>
+              <td>{{product.contacto}}</td>
+              <td>{{product.disponibilidad}}</td>
+              <td>{{product.fecha_creacion}}</td>  
+              <td>{{product.fecha_modificacion}}</td>
+            </tr>
+          </thead>
+        </table>
+      </div>
+    </div>
+  </div>
