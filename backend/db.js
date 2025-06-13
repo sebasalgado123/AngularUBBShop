@@ -11,7 +11,7 @@ const pool = mysql.createPool({
   port: process.env.DB_PORT,
   timezone: 'Z',
   ssl: {
-    rejectUnauthorized: false // Necesario para Railway
+    rejectUnauthorized: false 
   }
 });
 

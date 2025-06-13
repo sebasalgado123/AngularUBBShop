@@ -6,7 +6,7 @@ const fs = require('fs');
 
 const pool = require('../db');
 
-// Tablas y columnas según la base de datos `proyectoangular`
+// Tablas y columnas según la base de datos
 const TABLA_PRODUCTO = 'producto';
 const TABLA_IMAGEN_PRODUCTO = 'imagen_producto';
 
@@ -17,9 +17,9 @@ function mapearAColumnasBD(body) {
     id_categorias: body.categoria_id,
     descripcion: body.descripcion,
     precio: body.precio,
-    informacion_contacto: body.info_contacto,
+    contacto: body.info_contacto,
     id_usuario: body.usuario_id,
-    ...(body.esta_activo !== undefined ? { activo: body.esta_activo } : {}),
+    disponibilidad: body.disponibilidad
   };
 }
 
@@ -31,11 +31,11 @@ function mapearAFrontEnd(reg) {
     titulo: reg.titulo,
     descripcion: reg.descripcion,
     precio: reg.precio,
-    info_contacto: reg.informacion_contacto,
+    info_contacto: reg.contacto,
     usuario_id: reg.id_usuario,
-    esta_activo: reg.activo,
+    disponibilidad: reg.disponibilidad,
     fecha_creacion: reg.fecha_creacion,
-    fecha_modificacion: reg.fecha_modificacion,
+    fecha_modificacion: reg.fecha_modificacion
   };
 }
 
@@ -71,7 +71,7 @@ router.post('/', upload.array('imagenes', 5), (req, res) => {
 
   const producto = {
     ...mapearAColumnasBD({ titulo, categoria_id, descripcion, precio, info_contacto, usuario_id }),
-    activo: 1,
+    disponibilidad: 1
   };
 
   pool.query(`INSERT INTO \`${TABLA_PRODUCTO}\` SET ?`, producto, (err, result) => {
@@ -135,9 +135,9 @@ router.get('/:id', (req, res) => {
 // Actualizar producto
 router.put('/:id', upload.array('imagenes', 5), (req, res) => {
   const { id } = req.params;
-  const { titulo, categoria_id, descripcion, precio, info_contacto, esta_activo } = req.body;
+  const { titulo, categoria_id, descripcion, precio, info_contacto, disponibilidad } = req.body;
 
-  let data = mapearAColumnasBD({ titulo, categoria_id, descripcion, precio, info_contacto, esta_activo });
+  let data = mapearAColumnasBD({ titulo, categoria_id, descripcion, precio, info_contacto, disponibilidad });
   // Quitar propiedades undefined para no sobreescribir con NULL/undefined
   Object.keys(data).forEach((k) => data[k] === undefined && delete data[k]);
 

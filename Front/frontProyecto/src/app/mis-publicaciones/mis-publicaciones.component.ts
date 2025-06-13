@@ -9,7 +9,7 @@ import { ProductoService } from '../services/producto.service';
 })
 export class MisPublicacionesComponent implements OnInit {
   publicaciones: any[] = [];
-  usuarioId = 1; // TODO: reemplazar con id de usuario autenticado
+  usuarioId = 1; // reemplazar con id de usuario autenticado cuando se pueda
 
   constructor(private productoService: ProductoService, private router: Router) {}
 

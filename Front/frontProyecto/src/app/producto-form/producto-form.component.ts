@@ -7,7 +7,7 @@ import { ProductoService } from '../services/producto.service';
 @Component({
   selector: 'app-producto-form',
   templateUrl: './producto-form.component.html',
-  styleUrls: ['./producto-form.component.css']
+  styleUrls: ['./producto-form.component.css'],
 })
 export class ProductoFormComponent implements OnInit {
   formulario!: FormGroup;
@@ -16,7 +16,7 @@ export class ProductoFormComponent implements OnInit {
   imagenesArchivos: File[] = [];
   editMode = false;
   productoId!: number;
-  usuarioId = 1; // TODO: reemplazar con id del usuario autenticado
+  usuarioId = 1; // reemplazar con id de usuario autenticado cuando se pueda
 
   constructor(
     private fb: FormBuilder,
@@ -33,10 +33,12 @@ export class ProductoFormComponent implements OnInit {
       descripcion: ['', [Validators.required, Validators.maxLength(2000)]],
       precio: ['', [Validators.required, Validators.min(0)]],
       info_contacto: ['', [Validators.required, Validators.maxLength(255)]],
-      imagenes: ['']
+      imagenes: [''],
     });
 
-    this.categoriaService.obtenerCategorias().subscribe((cats) => (this.categorias = cats));
+    this.categoriaService
+      .obtenerCategorias()
+      .subscribe((cats) => (this.categorias = cats));
 
     // Verificar si es modo edición
     this.route.paramMap.subscribe((params) => {
@@ -56,7 +58,7 @@ export class ProductoFormComponent implements OnInit {
         categoria_id: prod.categoria_id,
         descripcion: prod.descripcion,
         precio: prod.precio,
-        info_contacto: prod.info_contacto
+        info_contacto: prod.info_contacto,
       });
       this.imagenesPreview = prod.imagenes || [];
     });
@@ -83,7 +85,10 @@ export class ProductoFormComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.formulario.invalid) return;
+    if (this.formulario.invalid) {
+      alert('Por favor, complete todos los campos requeridos correctamente');
+      return;
+    }
 
     const formData = new FormData();
     const valores = this.formulario.value;
@@ -99,14 +104,28 @@ export class ProductoFormComponent implements OnInit {
     });
 
     if (this.editMode) {
-      this.productoService.actualizarProducto(this.productoId, formData).subscribe(() => {
-        alert('Publicación actualizada');
-        this.router.navigate(['/mis-publicaciones']);
-      });
+      this.productoService
+        .actualizarProducto(this.productoId, formData)
+        .subscribe({
+          next: () => {
+            alert('Publicación actualizada exitosamente');
+            this.router.navigate(['/mis-publicaciones']);
+          },
+          error: (error) => {
+            console.error('Error al actualizar:', error);
+            alert('Error al actualizar la publicación: ' + (error.error?.mensaje || 'Error desconocido'));
+          }
+        });
     } else {
-      this.productoService.crearProducto(formData).subscribe(() => {
-        alert('Publicación creada');
-        this.router.navigate(['/mis-publicaciones']);
+      this.productoService.crearProducto(formData).subscribe({
+        next: () => {
+          alert('Publicación creada exitosamente');
+          this.router.navigate(['/mis-publicaciones']);
+        },
+        error: (error) => {
+          console.error('Error al crear:', error);
+          alert('Error al crear la publicación: ' + (error.error?.mensaje || 'Error desconocido'));
+        }
       });
     }
   }
