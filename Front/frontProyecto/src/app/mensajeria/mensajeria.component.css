@@ -13,48 +13,111 @@ h2 { margin-top: 2rem; }
 
 .message-bubble {
   background: white;
-  border-radius: var(--border-radius);
+  border-radius: 12px;
   padding: 1rem;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  max-width: 80%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  max-width: 85%;
+  border: 1px solid #e9ecef;
 }
 
-.own-message .message-bubble {
-  background: var(--primary-color);
+.own-bubble {
+  background: linear-gradient(135deg, #007bff, #0056b3);
   color: white;
   margin-left: auto;
+  border: none;
+}
+
+.other-bubble {
+  background: white;
+  color: #000000;
+  margin-right: auto;
 }
 
 .own-message .message-header {
-  color: rgba(255,255,255,0.8);
+  color: #000000;
 }
 
 .message-header {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .message-content {
   word-wrap: break-word;
+  line-height: 1.5;
+}
+
+.message-text {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  margin: 0;
+  background: transparent;
+  border: none;
+  color: #000000 !important;
+  font-weight: 500;
 }
 
 .list-group-item-action:hover {
   background-color: var(--light-color);
   cursor: pointer;
+  transform: translateX(2px);
+  transition: all 0.2s ease;
 }
 
 .list-group-item.active {
   background-color: var(--primary-color);
   border-color: var(--primary-color);
+  box-shadow: 0 2px 4px rgba(0,123,255,0.3);
 }
 
 .input-group .btn {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
+  min-width: 100px;
 }
 
 .input-group textarea {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
-  min-height: 60px;
+  min-height: 80px;
+  font-size: 0.95rem;
+}
+
+/* Mejoras adicionales */
+.messages-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.messages-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Animación para nuevos mensajes */
+.message-item {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 } 

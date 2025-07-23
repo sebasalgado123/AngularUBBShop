@@ -104,11 +104,18 @@
                   Volver al listado
                 </button>
                 
-                <button *ngIf="isLoggedIn && product?.usuario_id !== currentUserId" 
+                <button *ngIf="isLoggedIn && product?.usuario_id !== currentUserId && product?.disponibilidad" 
                         class="btn btn-success me-2" 
                         (click)="abrirMensaje()">
                   <i class="bi bi-chat-dots me-1"></i>
                   Enviar mensaje
+                </button>
+                
+                <button *ngIf="isLoggedIn && product?.usuario_id !== currentUserId && product?.disponibilidad" 
+                        class="btn btn-danger me-2" 
+                        (click)="realizarCompra()">
+                  <i class="bi bi-cart-plus me-1"></i>
+                  Comprar ahora
                 </button>
                 
                 <button *ngIf="isLoggedIn" 

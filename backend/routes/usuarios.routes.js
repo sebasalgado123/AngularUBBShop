@@ -88,6 +88,20 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+// Obtener usuario por ID (público para obtener nombres)
+router.get('/:id', async (req, res) => {
+  try {
+    const [usuarios] = await pool.promise().query('SELECT id_usuario, nombre, email FROM usuario WHERE id_usuario = ?', [req.params.id]);
+    if (usuarios.length === 0) {
+      return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+    }
+    res.json(usuarios[0]);
+  } catch (err) {
+    console.error('Error obteniendo usuario:', err);
+    res.status(500).json({ mensaje: 'Error al obtener usuario' });
+  }
+});
+
 // Eliminar usuario (solo admin)
 router.delete('/:id', authMiddleware, async (req, res) => {
   if (req.user.rol !== 'admin') return res.status(403).json({ mensaje: 'Solo admin puede eliminar usuarios' });

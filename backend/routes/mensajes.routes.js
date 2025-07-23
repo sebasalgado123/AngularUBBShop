@@ -32,10 +32,9 @@ router.post('/', authMiddleware, async (req, res) => {
     // Crear notificación automática para el destinatario
     const [remitente] = await pool.promise().query('SELECT nombre FROM usuario WHERE id_usuario = ?', [remitente_id]);
     const nombreRemitente = remitente[0]?.nombre || 'Usuario';
-    await pool.promise().query('INSERT INTO notificacion (id_usuario, mensaje, titulo) VALUES (?, ?, ?)', [
+    await pool.promise().query('INSERT INTO notificacion (id_usuario, mensaje) VALUES (?, ?)', [
       destinatario_id, 
-      `Tienes un nuevo mensaje de ${nombreRemitente}`,
-      'Nuevo mensaje'
+      `Tienes un nuevo mensaje de ${nombreRemitente}`
     ]);
     
     res.json({ mensaje: 'Mensaje enviado' });

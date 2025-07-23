@@ -23,7 +23,16 @@
                      (click)="seleccionarConversacion(c.usuario_conversacion)">
                   <div class="d-flex align-items-center">
                     <i class="bi bi-person-circle me-2"></i>
-                    <span>Usuario {{c.usuario_conversacion}}</span>
+                    <div class="flex-grow-1">
+                      <div class="fw-bold">
+                        <span *ngIf="!cargandoUsuarios.has(c.usuario_conversacion)">
+                          {{obtenerNombreUsuario(c.usuario_conversacion)}}
+                        </span>
+                        <span *ngIf="cargandoUsuarios.has(c.usuario_conversacion)" class="text-muted">
+                          <i class="bi bi-arrow-clockwise me-1"></i>Cargando...
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -36,23 +45,31 @@
               <div *ngIf="usuarioConversacion" class="mb-3">
                 <h5 class="mb-3">
                   <i class="bi bi-chat me-2"></i>
-                  Mensajes con usuario {{usuarioConversacion}}
+                  Mensajes con {{obtenerNombreUsuario(usuarioConversacion)}}
                 </h5>
               </div>
 
               <!-- Lista de mensajes -->
-              <div class="messages-container" style="height: 300px; overflow-y: auto;">
+              <div class="messages-container" style="height: 400px; overflow-y: auto; background-color: #f8f9fa; border-radius: 8px; padding: 15px;">
                 <div *ngIf="mensajes.length; else sinMensajes">
                   <div *ngFor="let m of mensajes" 
                        class="message-item mb-3"
                        [class.own-message]="m.remitente_id === usuarioActual.id">
-                    <div class="message-bubble">
+                    <div class="message-bubble" 
+                         [class.own-bubble]="m.remitente_id === usuarioActual.id"
+                         [class.other-bubble]="m.remitente_id !== usuarioActual.id">
                       <div class="message-header">
-                        <span *ngIf="m.remitente_id === usuarioActual.id" class="fw-bold text-primary">
-                          <i class="bi bi-person me-1"></i>Tú
+                        <span *ngIf="m.remitente_id === usuarioActual.id" class="fw-bold text-dark">
+                          <i class="bi bi-person-fill me-1"></i>Tú
                         </span>
                         <span *ngIf="m.remitente_id !== usuarioActual.id" class="fw-bold text-secondary">
-                          <i class="bi bi-person me-1"></i>Usuario {{m.remitente_id}}
+                          <i class="bi bi-person me-1"></i>
+                          <span *ngIf="!cargandoUsuarios.has(m.remitente_id)">
+                            {{obtenerNombreUsuario(m.remitente_id)}}
+                          </span>
+                          <span *ngIf="cargandoUsuarios.has(m.remitente_id)" class="text-muted">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Cargando...
+                          </span>
                         </span>
                         <small class="text-muted ms-2">
                           <i class="bi bi-clock me-1"></i>
@@ -60,7 +77,7 @@
                         </small>
                       </div>
                       <div class="message-content">
-                        {{m.contenido}}
+                        <pre class="message-text text-dark">{{m.contenido}}</pre>
                       </div>
                     </div>
                   </div>
@@ -75,16 +92,22 @@
 
               <!-- Formulario de nuevo mensaje -->
               <div *ngIf="usuarioConversacion" class="mt-3">
-                <div class="input-group">
-                  <textarea class="form-control" 
-                            [(ngModel)]="nuevoMensaje" 
-                            placeholder="Escribe un mensaje..."
-                            rows="2"></textarea>
-                  <button class="btn btn-primary" 
-                          (click)="enviarMensaje()"
-                          [disabled]="!nuevoMensaje.trim()">
-                    <i class="bi bi-send"></i>
-                  </button>
+                <div class="card">
+                  <div class="card-body">
+                    <div class="input-group">
+                      <textarea class="form-control" 
+                                [(ngModel)]="nuevoMensaje" 
+                                placeholder="Escribe tu mensaje aquí..."
+                                rows="3"
+                                style="resize: none;"></textarea>
+                      <button class="btn btn-primary" 
+                              (click)="enviarMensaje()"
+                              [disabled]="!nuevoMensaje.trim()">
+                        <i class="bi bi-send me-1"></i>
+                        Enviar
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

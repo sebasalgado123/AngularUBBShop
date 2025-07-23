@@ -1,61 +1,529 @@
-<div class="row">
-  <div class="col-12">
-    <div class="card shadow-sm">
-      <div class="card-header bg-success text-white">
-        <h3 class="mb-0">
-          <i class="bi bi-credit-card me-2"></i>
-          Mis Pagos
-        </h3>
-      </div>
-      <div class="card-body">
-        <div *ngIf="mensaje" class="alert alert-success">{{mensaje}}</div>
-        <div *ngIf="error" class="alert alert-info">{{error}}</div>
+<!-- Modo Compra -->
+<div *ngIf="modoCompra" class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="#" (click)="volverAProducto(); $event.preventDefault()">
+              <i class="bi bi-arrow-left me-1"></i>
+              Volver al producto
+            </a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">Proceso de Pago</li>
+        </ol>
+      </nav>
 
-        <div *ngIf="!error && pagos.length; else sinPagos">
-          <div class="table-responsive">
-            <table class="table table-hover">
-              <thead class="table-light">
-                <tr>
-                  <th>ID Pago</th>
-                  <th>Producto</th>
-                  <th>Monto</th>
-                  <th>Método</th>
-                  <th>Estado</th>
-                  <th>Fecha</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let p of pagos">
-                  <td><strong>#{{p.id_pago}}</strong></td>
-                  <td>{{p.producto_titulo}}</td>
-                  <td><strong>{{p.monto | currency:'CLP'}}</strong></td>
-                  <td>{{p.metodo_pago}}</td>
-                  <td>
-                    <span [class]="'badge ' + (p.estado === 'completado' ? 'bg-success' : p.estado === 'pendiente' ? 'bg-warning' : 'bg-danger')">
-                      {{p.estado}}
-                    </span>
-                  </td>
-                  <td>{{p.fecha_pago | date:'short'}}</td>
-                  <td>
-                    <button *ngIf="p.estado === 'pendiente'" class="btn btn-danger btn-sm" (click)="cancelarPago(p.id_pago)">
-                      <i class="bi bi-x-circle me-1"></i>
-                      Cancelar
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+      <div class="row">
+        <!-- Formulario de Pago -->
+        <div class="col-lg-8">
+          <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white">
+              <h4 class="mb-0">
+                <i class="bi bi-credit-card me-2"></i>
+                Información de Pago
+              </h4>
+            </div>
+            <div class="card-body">
+              <div *ngIf="error" class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                {{error}}
+              </div>
+              <div *ngIf="mensaje" class="alert alert-success">
+                <i class="bi bi-check-circle me-2"></i>
+                {{mensaje}}
+              </div>
+
+              <!-- Método de Pago -->
+              <div class="mb-4">
+                <h5>Método de Pago</h5>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" id="tarjeta" 
+                             [(ngModel)]="metodoPago" value="tarjeta" checked>
+                      <label class="form-check-label" for="tarjeta">
+                        <i class="bi bi-credit-card me-2"></i>
+                        Tarjeta de Crédito/Débito
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" id="transferencia" 
+                             [(ngModel)]="metodoPago" value="transferencia">
+                      <label class="form-check-label" for="transferencia">
+                        <i class="bi bi-bank me-2"></i>
+                        Transferencia Bancaria
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Información de Tarjeta -->
+              <div *ngIf="metodoPago === 'tarjeta'">
+                <div class="row">
+                  <div class="col-md-8">
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Número de Tarjeta</label>
+                      <input type="text" class="form-control" 
+                             [(ngModel)]="numeroTarjeta"
+                             (input)="formatearNumeroTarjeta($event)"
+                             placeholder="1234 5678 9012 3456"
+                             maxlength="19">
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">CVV</label>
+                      <input type="text" class="form-control" 
+                             [(ngModel)]="cvv"
+                             placeholder="123"
+                             maxlength="4">
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Fecha de Vencimiento</label>
+                      <input type="text" class="form-control" 
+                             [(ngModel)]="fechaVencimiento"
+                             (input)="formatearFechaVencimiento($event)"
+                             placeholder="MM/YY"
+                             maxlength="5">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Nombre del Titular</label>
+                      <input type="text" class="form-control" 
+                             [(ngModel)]="nombreTitular"
+                             placeholder="Como aparece en la tarjeta">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Información de Contacto -->
+              <div class="mb-4">
+                <h5>Información de Contacto</h5>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Email</label>
+                  <input type="email" class="form-control" 
+                         [(ngModel)]="email"
+                         placeholder="tu@email.com">
+                </div>
+              </div>
+
+              <!-- Botón de Pago -->
+              <div class="d-grid">
+                <button class="btn btn-success btn-lg" 
+                        (click)="procesarPago()"
+                        [disabled]="procesandoPago">
+                  <span *ngIf="!procesandoPago">
+                    <i class="bi bi-lock me-2"></i>
+                    Pagar {{producto?.precio | currency:'CLP'}}
+                  </span>
+                  <span *ngIf="procesandoPago">
+                    <div class="spinner-border spinner-border-sm me-2" role="status">
+                      <span class="visually-hidden">Procesando...</span>
+                    </div>
+                    Procesando pago...
+                  </span>
+                </button>
+              </div>
+
+              <!-- Información de Seguridad -->
+              <div class="mt-4 p-3 bg-light rounded">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-shield-check text-success me-2"></i>
+                  <small class="text-muted">
+                    Tu información está protegida y segura
+                  </small>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <ng-template #sinPagos>
-          <div class="text-center py-5">
-            <i class="bi bi-credit-card" style="font-size: 4rem; color: #ccc;"></i>
-            <h4 class="text-muted mt-3">No tienes pagos registrados</h4>
-            <p class="text-muted">Los pagos que realices aparecerán aquí</p>
+
+        <!-- Resumen de Compra -->
+        <div class="col-lg-4">
+          <div class="card shadow-lg">
+            <div class="card-header bg-secondary text-white">
+              <h5 class="mb-0">
+                <i class="bi bi-cart-check me-2"></i>
+                Resumen de Compra
+              </h5>
+            </div>
+            <div class="card-body">
+              <!-- Información del Producto -->
+              <div class="mb-4">
+                <div class="d-flex align-items-center mb-2">
+                  <i class="bi bi-box text-primary me-2"></i>
+                  <h6 class="fw-bold text-primary mb-0">Producto a Comprar</h6>
+                </div>
+                <div class="border rounded p-3 bg-light">
+                  <h6 class="fw-bold text-dark mb-2">{{producto?.titulo}}</h6>
+                  <p class="text-muted mb-0">
+                    <i class="bi bi-person me-1"></i>
+                    Vendedor: <span class="fw-bold text-dark">{{obtenerNombreVendedor(producto?.vendedor_id)}}</span>
+                  </p>
+                </div>
+              </div>
+              
+              <hr>
+              
+              <!-- Desglose de Costos -->
+              <div class="mb-3">
+                <h6 class="fw-bold mb-3">
+                  <i class="bi bi-calculator me-2"></i>
+                  Desglose de Costos
+                </h6>
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Precio del producto:</span>
+                  <span class="fw-bold">{{producto?.precio | currency:'CLP'}}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span>IVA (19%):</span>
+                  <span class="text-muted">{{(producto?.precio * 0.19) | currency:'CLP'}}</span>
+                </div>
+              </div>
+              
+              <hr>
+              
+              <!-- Total -->
+              <div class="d-flex justify-content-between fw-bold fs-5 p-3 bg-success text-white rounded">
+                <span>Total a Pagar:</span>
+                <span>{{(producto?.precio * 1.19) | currency:'CLP'}}</span>
+              </div>
+              
+              <!-- Información adicional -->
+              <div class="mt-3 p-2 bg-info text-white rounded small">
+                <i class="bi bi-info-circle me-1"></i>
+                El pago incluye todos los impuestos aplicables
+              </div>
+            </div>
           </div>
-        </ng-template>
+        </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Modal de Detalle de Pago -->
+<div class="modal fade" tabindex="-1" [ngClass]="{ 'show d-block': mostrarModalDetallePago }" *ngIf="mostrarModalDetallePago">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-search me-2"></i>
+          Detalle del Pago
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModalDetallePago()"></button>
+      </div>
+      <div class="modal-body" *ngIf="pagoSeleccionado">
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="fw-bold text-primary mb-3">
+              <i class="bi bi-box me-2"></i>
+              Información del Producto
+            </h6>
+                         <div class="card mb-3">
+               <div class="card-body">
+                 <p><strong>Producto:</strong> {{pagoSeleccionado.producto_titulo}}</p>
+                 <p><strong>Vendedor:</strong> {{obtenerNombreVendedor(pagoSeleccionado)}}</p>
+                 <p><strong>Precio:</strong> {{pagoSeleccionado.monto | currency:'CLP'}}</p>
+               </div>
+             </div>
+          </div>
+          <div class="col-md-6">
+            <h6 class="fw-bold text-success mb-3">
+              <i class="bi bi-credit-card me-2"></i>
+              Información del Pago
+            </h6>
+                         <div class="card mb-3">
+               <div class="card-body">
+                 <p><strong>Método de Pago:</strong> {{pagoSeleccionado.metodo_pago}} ****{{obtenerUltimosDigitos(pagoSeleccionado.metodo_pago)}}</p>
+                 <p><strong>Estado:</strong> 
+                   <span [class]="'badge ' + (pagoSeleccionado.estado === 'completado' ? 'bg-success' : pagoSeleccionado.estado === 'pendiente' ? 'bg-warning' : 'bg-danger')">
+                     {{pagoSeleccionado.estado}}
+                   </span>
+                 </p>
+               </div>
+             </div>
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-12">
+            <h6 class="fw-bold text-info mb-3">
+              <i class="bi bi-calendar me-2"></i>
+              Información Temporal
+            </h6>
+            <div class="card">
+              <div class="card-body">
+                <p><strong>Fecha de Pago:</strong> {{pagoSeleccionado.fecha_pago | date:'fullDate'}}</p>
+                <p><strong>Hora:</strong> {{pagoSeleccionado.fecha_pago | date:'shortTime'}}</p>
+                <p><strong>Días desde el pago:</strong> {{calcularDiasDesdePago(pagoSeleccionado.fecha_pago)}} días</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalDetallePago()">
+          <i class="bi bi-x-circle me-1"></i>
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Detalle de Venta -->
+<div class="modal fade" tabindex="-1" [ngClass]="{ 'show d-block': mostrarModalDetalleVenta }" *ngIf="mostrarModalDetalleVenta">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-cash-coin me-2"></i>
+          Detalle de la Venta
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModalDetalleVenta()"></button>
+      </div>
+      <div class="modal-body" *ngIf="ventaSeleccionada">
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="fw-bold text-primary mb-3">
+              <i class="bi bi-box me-2"></i>
+              Información del Producto
+            </h6>
+                         <div class="card mb-3">
+               <div class="card-body">
+                 <p><strong>Producto:</strong> {{ventaSeleccionada.producto_titulo}}</p>
+                 <p><strong>Precio Original:</strong> {{ventaSeleccionada.precio_original | currency:'CLP'}}</p>
+               </div>
+             </div>
+          </div>
+          <div class="col-md-6">
+            <h6 class="fw-bold text-success mb-3">
+              <i class="bi bi-person me-2"></i>
+              Información del Comprador
+            </h6>
+                         <div class="card mb-3">
+               <div class="card-body">
+                 <p><strong>Comprador:</strong> {{ventaSeleccionada.comprador_nombre}}</p>
+                 <p><strong>Monto Pagado:</strong> {{ventaSeleccionada.monto | currency:'CLP'}}</p>
+               </div>
+             </div>
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="fw-bold text-warning mb-3">
+              <i class="bi bi-calculator me-2"></i>
+              Información Financiera
+            </h6>
+            <div class="card mb-3">
+              <div class="card-body">
+                <p><strong>Comisión Cobrada:</strong> <span class="text-danger">-{{ventaSeleccionada.comision_cobrada | currency:'CLP'}}</span></p>
+                <p><strong>Total Recibido:</strong> <span class="text-success">{{ventaSeleccionada.precio_original | currency:'CLP'}}</span></p>
+                <p><strong>Porcentaje de Comisión:</strong> {{calcularPorcentajeComision(ventaSeleccionada.comision_cobrada, ventaSeleccionada.monto)}}%</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h6 class="fw-bold text-info mb-3">
+              <i class="bi bi-calendar me-2"></i>
+              Información Temporal
+            </h6>
+            <div class="card mb-3">
+              <div class="card-body">
+                <p><strong>Fecha de Venta:</strong> {{ventaSeleccionada.fecha_pago | date:'fullDate'}}</p>
+                <p><strong>Hora:</strong> {{ventaSeleccionada.fecha_pago | date:'shortTime'}}</p>
+                <p><strong>Días desde la venta:</strong> {{calcularDiasDesdePago(ventaSeleccionada.fecha_pago)}} días</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalDetalleVenta()">
+          <i class="bi bi-x-circle me-1"></i>
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modo Historial de Pagos -->
+<div *ngIf="!modoCompra" class="row">
+  <div class="col-12">
+    <!-- Botones para cambiar entre compras y ventas -->
+    <div class="mb-3" *ngIf="modoVendedor">
+      <button class="btn btn-outline-success me-2" 
+              [class.active]="activeTab === 'compras'"
+              (click)="changeTab('compras')">
+        <i class="bi bi-cart me-2"></i>Mis Compras
+      </button>
+      <button class="btn btn-outline-primary" 
+              [class.active]="activeTab === 'ventas'"
+              (click)="changeTab('ventas')">
+        <i class="bi bi-cash-coin me-2"></i>Mis Ventas
+      </button>
+    </div>
+
+    <!-- Mensaje informativo para usuarios que no son vendedores -->
+    <div class="alert alert-info" *ngIf="!modoVendedor && !modoCompra">
+      <i class="bi bi-info-circle me-2"></i>
+      <strong>¿Quieres vender productos?</strong> 
+      <a href="/publicar" class="alert-link">Publica tu primer producto</a> para empezar a vender y ver tus ventas aquí.
+    </div>
+
+
+
+    <!-- Contenido de las pestañas -->
+    <div class="tab-content">
+      <!-- Pestaña de Compras -->
+      <div class="tab-pane" 
+           [class.show]="activeTab === 'compras' || !modoVendedor"
+           [class.active]="activeTab === 'compras' || !modoVendedor">
+        <div class="card shadow-sm">
+          <div class="card-header bg-success text-white">
+            <h3 class="mb-0">
+              <i class="bi bi-credit-card me-2"></i>
+              Mis Compras
+            </h3>
+          </div>
+          <div class="card-body">
+            <div *ngIf="mensaje" class="alert alert-success">{{mensaje}}</div>
+            <div *ngIf="error" class="alert alert-info">{{error}}</div>
+
+            <div *ngIf="!error && pagos.length; else sinPagos">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Producto</th>
+                      <th>Monto</th>
+                      <th>Método</th>
+                      <th>Estado</th>
+                      <th>Fecha</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let p of pagos">
+                      <td>{{p.producto_titulo}}</td>
+                      <td><strong>{{p.monto | currency:'CLP'}}</strong></td>
+                      <td>{{p.metodo_pago}}</td>
+                      <td>
+                        <span [class]="'badge ' + (p.estado === 'completado' ? 'bg-success' : p.estado === 'pendiente' ? 'bg-warning' : 'bg-danger')">
+                          {{p.estado}}
+                        </span>
+                      </td>
+                      <td>{{p.fecha_pago | date:'short'}}</td>
+                      <td>
+                        <div class="btn-group" role="group">
+                          <button class="btn btn-primary btn-sm me-1" 
+                                  (click)="verDetallePago(p)"
+                                  title="Ver detalle">
+                            ⋯
+                          </button>
+                          <button *ngIf="p.estado === 'pendiente'" 
+                                  class="btn btn-danger btn-sm" 
+                                  (click)="cancelarPago(p.id_pago)"
+                                  title="Cancelar pago">
+                            <i class="bi bi-x-circle"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <ng-template #sinPagos>
+              <div class="text-center py-5">
+                <i class="bi bi-credit-card" style="font-size: 4rem; color: #ccc;"></i>
+                <h4 class="text-muted mt-3">No tienes compras registradas</h4>
+                <p class="text-muted">Las compras que realices aparecerán aquí</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pestaña de Ventas (solo para vendedores) -->
+      <div class="tab-pane" 
+           [class.show]="activeTab === 'ventas'"
+           [class.active]="activeTab === 'ventas'"
+           *ngIf="modoVendedor">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">
+              <i class="bi bi-cash-coin me-2"></i>
+              Mis Ventas
+            </h3>
+          </div>
+          <div class="card-body">
+            <div *ngIf="ventas.length; else sinVentas">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Producto</th>
+                      <th>Comprador</th>
+                      <th>Precio Original</th>
+                      <th>Comisión</th>
+                      <th>Total Recibido</th>
+                      <th>Fecha</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let v of ventas">
+                      <td>{{v.producto_titulo}}</td>
+                      <td>{{v.comprador_nombre}}</td>
+                      <td><strong>{{v.precio_original | currency:'CLP'}}</strong></td>
+                      <td class="text-danger">-{{v.comision_cobrada | currency:'CLP'}}</td>
+                      <td class="text-success"><strong>{{(v.precio_original) | currency:'CLP'}}</strong></td>
+                      <td>{{v.fecha_pago | date:'short'}}</td>
+                      <td>
+                        <button class="btn btn-primary btn-sm" 
+                                (click)="verDetalleVenta(v)"
+                                title="Ver detalle">
+                          ⋯
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <ng-template #sinVentas>
+              <div class="text-center py-5">
+                <i class="bi bi-cash-coin" style="font-size: 4rem; color: #ccc;"></i>
+                <h4 class="text-muted mt-3">No tienes ventas registradas</h4>
+                <p class="text-muted">Las ventas de tus productos aparecerán aquí cuando alguien los compre</p>
+                <div class="mt-3">
+                  <a href="/publicar" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Publicar Producto
+                  </a>
+                </div>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
   </div>
 </div> 

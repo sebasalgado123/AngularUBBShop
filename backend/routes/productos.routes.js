@@ -219,10 +219,10 @@ router.post('/:id/report', (req, res) => {
         const nombreReportador = reportador[0]?.nombre || 'Usuario';
         
         // Notificar al admin
-        await pool.promise().query('INSERT INTO notificacion (usuario_id, mensaje) VALUES (?, ?)', [1, `Nueva publicación reportada: "${tituloProducto}" por ${nombreReportador}`]);
+        await pool.promise().query('INSERT INTO notificacion (id_usuario, mensaje) VALUES (?, ?)', [1, `Nueva publicación reportada: "${tituloProducto}" por ${nombreReportador}`]);
         
         // Notificar al dueño de la publicación
-        await pool.promise().query('INSERT INTO notificacion (usuario_id, mensaje) VALUES (?, ?)', [producto[0].id_usuario, `Tu publicación "${tituloProducto}" ha sido reportada`]);
+        await pool.promise().query('INSERT INTO notificacion (id_usuario, mensaje) VALUES (?, ?)', [producto[0].id_usuario, `Tu publicación "${tituloProducto}" ha sido reportada`]);
       }
       
       res.json({ mensaje: 'Reporte enviado' });

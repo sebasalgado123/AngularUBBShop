@@ -21,10 +21,17 @@ export class NotificacionesComponent implements OnInit {
       next: data => {
         this.notificaciones = data;
         this.error = '';
+        console.log('Notificaciones cargadas:', data);
       },
       error: err => {
         console.error('Error cargando notificaciones:', err);
-        this.error = 'No hay notificaciones disponibles';
+        if (err.status === 401) {
+          this.error = 'Debes iniciar sesión para ver las notificaciones';
+        } else if (err.status === 500) {
+          this.error = 'Error del servidor al cargar notificaciones';
+        } else {
+          this.error = 'No hay notificaciones disponibles';
+        }
         this.notificaciones = [];
       }
     });

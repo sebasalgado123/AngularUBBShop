@@ -170,4 +170,18 @@ export class ProductDetailComponent implements OnInit {
       }
     });
   }
+
+  realizarCompra() {
+    if (!this.product) return;
+    
+    // Navegar a la página de pago con los datos del producto
+    this.router.navigate(['/pagos'], {
+      queryParams: {
+        producto_id: this.product.id,
+        titulo: this.product.titulo,
+        precio: this.product.precio,
+        vendedor_id: this.product.usuario_id
+      }
+    });
+  }
 } 

@@ -63,4 +63,8 @@ export class AuthService {
     // Para vendedor/comprador, cualquier usuario logueado (excepto admin) puede hacerlo
     return user && (user.rol === 'usuario' || user.rol === 'vendedor' || user.rol === 'comprador');
   }
+
+  obtenerUsuario(id: number): Observable<any> {
+    return this.http.get(`${this.api}/${id}`);
+  }
 } 

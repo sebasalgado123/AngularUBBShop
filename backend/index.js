@@ -21,6 +21,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Carpeta para servir imágenes subidas
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Endpoint de health check
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    database: 'connected'
+  });
+});
+
 // Rutas API
 app.use('/api/productos', productosRoutes);
 app.use('/api/categorias', categoriasRoutes);

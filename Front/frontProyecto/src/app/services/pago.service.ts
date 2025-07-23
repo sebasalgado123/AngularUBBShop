@@ -20,7 +20,21 @@ export class PagoService {
     return this.http.get<any[]>(`${this.api}/usuario/mis-pagos`);
   }
 
+  obtenerMisVentas(): Observable<any[]> {
+    console.log('Obteniendo mis ventas...');
+    return this.http.get<any[]>(`${this.api}/usuario/mis-ventas`);
+  }
+
+  verificarSiEsVendedor(): Observable<any> {
+    console.log('Verificando si es vendedor...');
+    return this.http.get<any>(`${this.api}/usuario/es-vendedor`);
+  }
+
   cancelarPago(pago_id: number): Observable<any> {
     return this.http.put(`${this.api}/${pago_id}/cancelar`, {});
+  }
+
+  realizarPago(datosPago: any): Observable<any> {
+    return this.http.post(`${this.api}/realizar`, datosPago);
   }
 } 
