@@ -1,18 +1,33 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-  <div class="container">
-    <a class="navbar-brand" routerLink="/">UBBShop</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="nav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" routerLink="/publicar">Publicar</a></li>
-        <li class="nav-item"><a class="nav-link" routerLink="/mis-publicaciones">Mis publicaciones</a></li>
-      </ul>
+<!--Barra de navegacion-->
+<nav class="navbar navbar-expand navbar-dark bg-primary">
+    <a class="navbar-brand" href="#">
+      <img width="150" alt="ubb logo" src="../assets/ubb.png">
+    </a>
+    <div>
+      <h1 id="Titulo">{{title}}</h1>
     </div>
-  </div>
 </nav>
+<!--Campo filtar-->
+<div class="card">
+  <div class="card-body">
+    <br>
+    <div class="row">
+      <div class="col-md-2">Filtrar por:</div>
+      <!-- Input de texto -->
+      <div class="col-md-4">
+        <input type="text"
+              [(ngModel)]="listFilter"
+              placeholder="Buscar producto..."/>
+      </div>
+      <!-- Menú desplegable de categorías -->
+      <div class="col-md-3">
+          <select class="form-select" [(ngModel)]="selectedCategory" (change)="onCategoryChange()">
+          <option *ngFor="let category of categories" [value]="category">{{category}}</option>
+          </select>
+      </div>
+    </div>
+    <br>
 
-<div class="container">
-  <router-outlet></router-outlet>
+    <app-product-list [datos]="filteredProducts"></app-product-list>
+  </div>
 </div>
