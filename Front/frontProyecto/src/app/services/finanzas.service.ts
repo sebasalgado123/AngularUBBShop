@@ -9,6 +9,7 @@ export class FinanzasService {
   constructor(private http: HttpClient) {}
 
   obtenerVentas(): Observable<any[]> {
+    console.log('Obteniendo ventas desde:', `${this.api}/ventas`);
     return this.http.get<any[]>(`${this.api}/ventas`);
   }
 

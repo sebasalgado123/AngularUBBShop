@@ -24,7 +24,7 @@ export class ConfigService {
         catchError(error => {
           console.log('Railway no disponible, usando local como fallback');
           this.isRailwayAvailable = false;
-          this.currentApiUrl = environment.localApiUrl;
+          this.currentApiUrl = environment.apiUrl;
           return of(null);
         })
       )
@@ -83,11 +83,11 @@ export class ConfigService {
         // Si falla Railway y estamos usando Railway, intentar con local
         if (this.isRailwayAvailable && this.currentApiUrl === environment.apiUrl) {
           console.log('Fallback a servidor local');
-          this.currentApiUrl = environment.localApiUrl;
+          this.currentApiUrl = environment.apiUrl;
           this.isRailwayAvailable = false;
           
           // Reintentar con la URL local
-          const localUrl = `${environment.localApiUrl}${endpoint}`;
+          const localUrl = `${environment.apiUrl}${endpoint}`;
           let localRequest: Observable<T>;
           
           switch (method) {

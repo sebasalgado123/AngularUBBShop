@@ -75,12 +75,17 @@ export class PagosComponent implements OnInit {
         console.log('Estado inicial - ModoVendedor:', this.modoVendedor);
         this.cargarPagos();
         this.cargarVentas();
+        
+        // Establecer la pestaña activa por defecto
+        setTimeout(() => {
+          this.activeTab = 'compras';
+        }, 100);
       }
     });
   }
 
   cargarPagos() {
-    console.log('Cargando pagos...');
+    console.log('Cargando pagos para usuario:', this.usuarioActual?.id);
     this.pagoService.obtenerMisPagos().subscribe({
       next: data => {
         console.log('Pagos cargados:', data);
@@ -105,25 +110,32 @@ export class PagosComponent implements OnInit {
         console.log('Usuario es vendedor:', this.modoVendedor);
         console.log('ActiveTab después de verificar vendedor:', this.activeTab);
         
-        // Luego cargar las ventas
-        this.pagoService.obtenerMisVentas().subscribe({
-          next: data => {
-            this.ventas = data;
-            console.log('Ventas cargadas:', data);
-            console.log('Número de ventas:', data.length);
-            console.log('Estado final - ModoVendedor:', this.modoVendedor);
-            console.log('Estado final - ActiveTab:', this.activeTab);
-          },
-          error: err => {
-            console.error('Error cargando ventas:', err);
-            this.ventas = [];
-          }
-        });
+        // Solo cargar ventas si es vendedor
+        if (this.modoVendedor) {
+          this.pagoService.obtenerMisVentas().subscribe({
+            next: data => {
+              this.ventas = data;
+              console.log('Ventas cargadas:', data);
+              console.log('Número de ventas:', data.length);
+              console.log('Estado final - ModoVendedor:', this.modoVendedor);
+              console.log('Estado final - ActiveTab:', this.activeTab);
+            },
+            error: err => {
+              console.error('Error cargando ventas:', err);
+              this.ventas = [];
+              this.modoVendedor = false;
+            }
+          });
+        } else {
+          this.ventas = [];
+          console.log('Usuario no es vendedor, no se cargan ventas');
+        }
       },
       error: err => {
         console.error('Error verificando si es vendedor:', err);
         this.modoVendedor = false;
         this.ventas = [];
+        console.log('Error al verificar si es vendedor, estableciendo modoVendedor = false');
       }
     });
   }
@@ -139,6 +151,12 @@ export class PagosComponent implements OnInit {
     if (tab === 'ventas' && this.modoVendedor) {
       console.log('Recargando ventas al cambiar a pestaña ventas');
       this.cargarVentas();
+    }
+    
+    // Si se cambia a la pestaña de compras, recargar los pagos
+    if (tab === 'compras') {
+      console.log('Recargando pagos al cambiar a pestaña compras');
+      this.cargarPagos();
     }
   }
 
@@ -285,7 +303,10 @@ export class PagosComponent implements OnInit {
 
   obtenerNombreVendedor(pago: any): string {
     // Usar el nombre del vendedor que viene del backend
-    return pago.vendedor_nombre || 'Usuario';
+    if (typeof pago === 'object' && pago.vendedor_nombre) {
+      return pago.vendedor_nombre;
+    }
+    return 'Usuario';
   }
 
   cargarInfoVendedor(vendedorId: number) {

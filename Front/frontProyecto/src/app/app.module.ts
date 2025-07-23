@@ -20,6 +20,7 @@ import { PagosComponent } from './pagos/pagos.component';
 import { HomeComponent } from './home/home.component';
 import { AuthInterceptor } from './services/auth.interceptor';
 import { ProductDetailComponent } from './product/product-detail/product-detail.component';
+import { FinanzasComponent } from './finanzas/finanzas.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { ProductDetailComponent } from './product/product-detail/product-detail.
     NotificacionesComponent,
     PagosComponent,
     HomeComponent,
-    ProductDetailComponent
+    ProductDetailComponent,
+    FinanzasComponent
   ],
   imports: [
     BrowserModule,

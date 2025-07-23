@@ -169,7 +169,7 @@
                   <h6 class="fw-bold text-dark mb-2">{{producto?.titulo}}</h6>
                   <p class="text-muted mb-0">
                     <i class="bi bi-person me-1"></i>
-                    Vendedor: <span class="fw-bold text-dark">{{obtenerNombreVendedor(producto?.vendedor_id)}}</span>
+                    Vendedor: <span class="fw-bold text-dark">{{obtenerNombreVendedor(producto)}}</span>
                   </p>
                 </div>
               </div>
@@ -365,7 +365,7 @@
 <div *ngIf="!modoCompra" class="row">
   <div class="col-12">
     <!-- Botones para cambiar entre compras y ventas -->
-    <div class="mb-3" *ngIf="modoVendedor">
+    <div class="mb-3">
       <button class="btn btn-outline-success me-2" 
               [class.active]="activeTab === 'compras'"
               (click)="changeTab('compras')">
@@ -373,7 +373,8 @@
       </button>
       <button class="btn btn-outline-primary" 
               [class.active]="activeTab === 'ventas'"
-              (click)="changeTab('ventas')">
+              (click)="changeTab('ventas')"
+              *ngIf="modoVendedor">
         <i class="bi bi-cash-coin me-2"></i>Mis Ventas
       </button>
     </div>
@@ -382,7 +383,7 @@
     <div class="alert alert-info" *ngIf="!modoVendedor && !modoCompra">
       <i class="bi bi-info-circle me-2"></i>
       <strong>¿Quieres vender productos?</strong> 
-      <a href="/publicar" class="alert-link">Publica tu primer producto</a> para empezar a vender y ver tus ventas aquí.
+      <a href="/publicar" class="alert-link"> Publica tu primer producto</a> para empezar a vender y ver tus ventas aquí.
     </div>
 
 
@@ -391,8 +392,8 @@
     <div class="tab-content">
       <!-- Pestaña de Compras -->
       <div class="tab-pane" 
-           [class.show]="activeTab === 'compras' || !modoVendedor"
-           [class.active]="activeTab === 'compras' || !modoVendedor">
+           [class.show]="activeTab === 'compras'"
+           [class.active]="activeTab === 'compras'">
         <div class="card shadow-sm">
           <div class="card-header bg-success text-white">
             <h3 class="mb-0">

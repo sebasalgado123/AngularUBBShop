@@ -11,6 +11,7 @@ import { NotificacionesComponent } from './notificaciones/notificaciones.compone
 import { PagosComponent } from './pagos/pagos.component';
 import { HomeComponent } from './home/home.component';
 import { ProductDetailComponent } from './product/product-detail/product-detail.component';
+import { FinanzasComponent } from './finanzas/finanzas.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -22,6 +23,7 @@ const routes: Routes = [
   { path: 'mensajeria', component: MensajeriaComponent, canActivate: [AuthGuard] },
   { path: 'notificaciones', component: NotificacionesComponent, canActivate: [AuthGuard] },
   { path: 'pagos', component: PagosComponent, canActivate: [AuthGuard] },
+  { path: 'finanzas', component: FinanzasComponent, canActivate: [AuthGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },

@@ -28,11 +28,12 @@ router.get('/ventas', authMiddleware, async (req, res) => {
     const [ventas] = await pool.promise().query(
       `SELECT p.*, pr.titulo, pr.precio, 
               (pr.precio * 0.95) as ganancia_vendedor,
-              (pr.precio * 0.05) as comision_plataforma
+              (pr.precio * 0.05) as comision_plataforma,
+              p.fecha_pago
        FROM pago p 
-       JOIN producto pr ON p.producto_id = pr.id_producto 
+       JOIN producto pr ON p.id_producto = pr.id_producto 
        WHERE pr.id_usuario = ? AND p.estado = 'completado'
-       ORDER BY p.fecha_creacion DESC`,
+       ORDER BY p.fecha_pago DESC`,
       [req.user.id]
     );
     res.json(ventas);
@@ -49,7 +50,7 @@ router.get('/balance', authMiddleware, async (req, res) => {
         SUM(pr.precio * 0.95) as total_ganancias,
         COUNT(*) as total_ventas
        FROM pago p 
-       JOIN producto pr ON p.producto_id = pr.id_producto 
+       JOIN producto pr ON p.id_producto = pr.id_producto 
        WHERE pr.id_usuario = ? AND p.estado = 'completado'`,
       [req.user.id]
     );
@@ -74,7 +75,7 @@ router.post('/retiro', authMiddleware, async (req, res) => {
     const [balance] = await pool.promise().query(
       `SELECT SUM(pr.precio * 0.95) as total_disponible
        FROM pago p 
-       JOIN producto pr ON p.producto_id = pr.id_producto 
+       JOIN producto pr ON p.id_producto = pr.id_producto 
        WHERE pr.id_usuario = ? AND p.estado = 'completado'`,
       [req.user.id]
     );
@@ -123,17 +124,17 @@ router.get('/admin/dashboard', authMiddleware, async (req, res) => {
         SUM(pr.precio * 0.05) as comisiones_totales,
         COUNT(DISTINCT pr.id_usuario) as vendedores_activos
        FROM pago p 
-       JOIN producto pr ON p.producto_id = pr.id_producto 
+       JOIN producto pr ON p.id_producto = pr.id_producto 
        WHERE p.estado = 'completado'`
     );
 
     const [ventasRecientes] = await pool.promise().query(
       `SELECT p.*, pr.titulo, u.nombre as vendedor
        FROM pago p 
-       JOIN producto pr ON p.producto_id = pr.id_producto 
+       JOIN producto pr ON p.id_producto = pr.id_producto 
        JOIN usuario u ON pr.id_usuario = u.id_usuario
        WHERE p.estado = 'completado'
-       ORDER BY p.fecha_creacion DESC
+       ORDER BY p.fecha_pago DESC
        LIMIT 10`
     );
 

@@ -73,6 +73,12 @@
                 Pagos
               </a>
             </li>
+            <li>
+              <a class="dropdown-item" routerLink="/finanzas">
+                <i class="bi bi-cash-coin me-2"></i>
+                Finanzas
+              </a>
+            </li>
             <li><hr class="dropdown-divider"></li>
             <li *ngIf="authService.hasRole('admin')">
               <a class="dropdown-item text-warning" routerLink="/admin">
