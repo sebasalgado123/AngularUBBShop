@@ -1,33 +1,126 @@
-<!--Barra de navegacion-->
-<nav class="navbar navbar-expand navbar-dark bg-primary">
-    <a class="navbar-brand" href="#">
-      <img width="150" alt="ubb logo" src="../assets/ubb.png">
+<!-- Barra de navegación mejorada -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <!-- Logo y título -->
+    <a class="navbar-brand d-flex align-items-center" routerLink="/home">
+      <img width="40" height="40" alt="UBB Logo" src="../assets/ubb.png" class="me-2">
+      <span class="brand-text">UBBShop</span>
     </a>
-    <div>
-      <h1 id="Titulo">{{title}}</h1>
-    </div>
-</nav>
-<!--Campo filtar-->
-<div class="card">
-  <div class="card-body">
-    <br>
-    <div class="row">
-      <div class="col-md-2">Filtrar por:</div>
-      <!-- Input de texto -->
-      <div class="col-md-4">
-        <input type="text"
-              [(ngModel)]="listFilter"
-              placeholder="Buscar producto..."/>
-      </div>
-      <!-- Menú desplegable de categorías -->
-      <div class="col-md-3">
-          <select class="form-select" [(ngModel)]="selectedCategory" (change)="onCategoryChange()">
-          <option *ngFor="let category of categories" [value]="category">{{category}}</option>
-          </select>
-      </div>
-    </div>
-    <br>
 
-    <app-product-list [datos]="filteredProducts"></app-product-list>
+
+
+    <!-- Botón hamburguesa para móvil -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Menú de navegación -->
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto">
+        
+        <!-- Enlaces para usuarios no logueados -->
+        <li class="nav-item" *ngIf="!authService.isLoggedIn()">
+          <a class="nav-link" routerLink="/login" routerLinkActive="active">
+            <i class="bi bi-box-arrow-in-right me-1"></i>
+            Iniciar Sesión
+          </a>
+        </li>
+        <li class="nav-item" *ngIf="!authService.isLoggedIn()">
+          <a class="nav-link" routerLink="/register" routerLinkActive="active">
+            <i class="bi bi-person-plus me-1"></i>
+            Registrarse
+          </a>
+        </li>
+
+        <!-- Menú desplegable para usuarios logueados -->
+        <li class="nav-item dropdown" *ngIf="authService.isLoggedIn()">
+          <a class="nav-link dropdown-toggle d-flex align-items-center" 
+             href="#" 
+             role="button" 
+             data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle me-2"></i>
+            <span>{{authService.getCurrentUser()?.nombre}}</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <a class="dropdown-item" routerLink="/publicar">
+                <i class="bi bi-plus-circle me-2"></i>
+                Publicar Producto
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" routerLink="/mis-publicaciones">
+                <i class="bi bi-collection me-2"></i>
+                Mis Publicaciones
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item" routerLink="/mensajeria">
+                <i class="bi bi-chat-dots me-2"></i>
+                Mensajes
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" routerLink="/notificaciones">
+                <i class="bi bi-bell me-2"></i>
+                Notificaciones
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" routerLink="/pagos">
+                <i class="bi bi-credit-card me-2"></i>
+                Pagos
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li *ngIf="authService.hasRole('admin')">
+              <a class="dropdown-item text-warning" routerLink="/admin">
+                <i class="bi bi-shield-check me-2"></i>
+                Panel Admin
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item text-danger" href="#" (click)="logout()">
+                <i class="bi bi-box-arrow-right me-2"></i>
+                Cerrar Sesión
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- Enlaces directos para pantallas grandes -->
+        <li class="nav-item d-none d-lg-block" *ngIf="authService.isLoggedIn()">
+          <a class="nav-link" routerLink="/publicar" routerLinkActive="active">
+            <i class="bi bi-plus-circle me-1"></i>
+            Publicar
+          </a>
+        </li>
+        <li class="nav-item d-none d-lg-block" *ngIf="authService.isLoggedIn()">
+          <a class="nav-link" routerLink="/mensajeria" routerLinkActive="active">
+            <i class="bi bi-chat-dots me-1"></i>
+            Mensajes
+          </a>
+        </li>
+        <li class="nav-item d-none d-lg-block" *ngIf="authService.isLoggedIn()">
+          <a class="nav-link" routerLink="/notificaciones" routerLinkActive="active">
+            <i class="bi bi-bell me-1"></i>
+            Notificaciones
+          </a>
+        </li>
+        <li class="nav-item d-none d-lg-block" *ngIf="authService.hasRole('admin')">
+          <a class="nav-link text-warning" routerLink="/admin" routerLinkActive="active">
+            <i class="bi bi-shield-check me-1"></i>
+            Administración
+          </a>
+        </li>
+      </ul>
+    </div>
   </div>
+</nav>
+
+<!-- Contenedor principal con padding -->
+<div class="container-fluid py-4">
+  <router-outlet></router-outlet>
 </div>

@@ -1,0 +1,61 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-header bg-success text-white">
+        <h3 class="mb-0">
+          <i class="bi bi-credit-card me-2"></i>
+          Mis Pagos
+        </h3>
+      </div>
+      <div class="card-body">
+        <div *ngIf="mensaje" class="alert alert-success">{{mensaje}}</div>
+        <div *ngIf="error" class="alert alert-info">{{error}}</div>
+
+        <div *ngIf="!error && pagos.length; else sinPagos">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>ID Pago</th>
+                  <th>Producto</th>
+                  <th>Monto</th>
+                  <th>Método</th>
+                  <th>Estado</th>
+                  <th>Fecha</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let p of pagos">
+                  <td><strong>#{{p.id_pago}}</strong></td>
+                  <td>{{p.producto_titulo}}</td>
+                  <td><strong>{{p.monto | currency:'CLP'}}</strong></td>
+                  <td>{{p.metodo_pago}}</td>
+                  <td>
+                    <span [class]="'badge ' + (p.estado === 'completado' ? 'bg-success' : p.estado === 'pendiente' ? 'bg-warning' : 'bg-danger')">
+                      {{p.estado}}
+                    </span>
+                  </td>
+                  <td>{{p.fecha_pago | date:'short'}}</td>
+                  <td>
+                    <button *ngIf="p.estado === 'pendiente'" class="btn btn-danger btn-sm" (click)="cancelarPago(p.id_pago)">
+                      <i class="bi bi-x-circle me-1"></i>
+                      Cancelar
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <ng-template #sinPagos>
+          <div class="text-center py-5">
+            <i class="bi bi-credit-card" style="font-size: 4rem; color: #ccc;"></i>
+            <h4 class="text-muted mt-3">No tienes pagos registrados</h4>
+            <p class="text-muted">Los pagos que realices aparecerán aquí</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div> 

@@ -1,0 +1,112 @@
+<h2>Panel Financiero</h2>
+<div *ngIf="mensaje" class="alert alert-success">{{mensaje}}</div>
+<div *ngIf="error" class="alert alert-danger">{{error}}</div>
+
+<!-- Balance -->
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card bg-primary text-white">
+      <div class="card-body">
+        <h5>Total Ganancias</h5>
+        <h3>{{balance.total_ganancias | currency:'CLP'}}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card bg-success text-white">
+      <div class="card-body">
+        <h5>Total Ventas</h5>
+        <h3>{{balance.total_ventas}}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card bg-info text-white">
+      <div class="card-body">
+        <h5>Acciones</h5>
+        <button class="btn btn-light" (click)="mostrarFormularioRetiro = true">Solicitar Retiro</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Formulario de retiro -->
+<div *ngIf="mostrarFormularioRetiro" class="card mb-4">
+  <div class="card-header">
+    <h5>Solicitar Retiro</h5>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6">
+        <label class="form-label">Monto</label>
+        <input type="number" class="form-control" [(ngModel)]="formRetiro.monto">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Cuenta Bancaria</label>
+        <input type="text" class="form-control" [(ngModel)]="formRetiro.cuenta_bancaria">
+      </div>
+    </div>
+    <div class="mt-3">
+      <button class="btn btn-primary" (click)="solicitarRetiro()">Solicitar</button>
+      <button class="btn btn-secondary ms-2" (click)="mostrarFormularioRetiro = false">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ventas -->
+<h3>Historial de Ventas</h3>
+<div *ngIf="ventas.length; else sinVentas">
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Precio</th>
+        <th>Tu Ganancia</th>
+        <th>Comisión</th>
+        <th>Fecha</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let v of ventas">
+        <td>{{v.titulo}}</td>
+        <td>{{v.precio | currency:'CLP'}}</td>
+        <td class="text-success">{{v.ganancia_vendedor | currency:'CLP'}}</td>
+        <td class="text-warning">{{v.comision_plataforma | currency:'CLP'}}</td>
+        <td>{{v.fecha_creacion | date:'short'}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<ng-template #sinVentas>
+  <p class="text-muted">No tienes ventas registradas.</p>
+</ng-template>
+
+<!-- Retiros -->
+<h3 class="mt-4">Historial de Retiros</h3>
+<div *ngIf="retiros.length; else sinRetiros">
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Monto</th>
+        <th>Cuenta</th>
+        <th>Estado</th>
+        <th>Fecha</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of retiros">
+        <td>{{r.monto | currency:'CLP'}}</td>
+        <td>{{r.cuenta_bancaria}}</td>
+        <td>
+          <span [class]="'badge ' + (r.estado === 'completado' ? 'bg-success' : r.estado === 'pendiente' ? 'bg-warning' : 'bg-danger')">
+            {{r.estado}}
+          </span>
+        </td>
+        <td>{{r.fecha_solicitud | date:'short'}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<ng-template #sinRetiros>
+  <p class="text-muted">No tienes retiros registrados.</p>
+</ng-template> 

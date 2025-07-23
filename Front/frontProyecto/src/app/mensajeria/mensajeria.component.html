@@ -1,0 +1,101 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card shadow-lg">
+      <div class="card-header">
+        <h3 class="mb-0">
+          <i class="bi bi-chat-dots me-2"></i>
+          Mensajería Interna
+        </h3>
+      </div>
+      <div class="card-body p-0">
+        <div class="row g-0">
+          <!-- Lista de conversaciones -->
+          <div class="col-md-4 border-end">
+            <div class="p-3">
+              <h5 class="mb-3">
+                <i class="bi bi-people me-2"></i>
+                Conversaciones
+              </h5>
+              <div class="list-group">
+                <div *ngFor="let c of conversaciones" 
+                     class="list-group-item list-group-item-action" 
+                     [class.active]="usuarioConversacion === c.usuario_conversacion" 
+                     (click)="seleccionarConversacion(c.usuario_conversacion)">
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-person-circle me-2"></i>
+                    <span>Usuario {{c.usuario_conversacion}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Área de mensajes -->
+          <div class="col-md-8">
+            <div class="p-3">
+              <div *ngIf="usuarioConversacion" class="mb-3">
+                <h5 class="mb-3">
+                  <i class="bi bi-chat me-2"></i>
+                  Mensajes con usuario {{usuarioConversacion}}
+                </h5>
+              </div>
+
+              <!-- Lista de mensajes -->
+              <div class="messages-container" style="height: 300px; overflow-y: auto;">
+                <div *ngIf="mensajes.length; else sinMensajes">
+                  <div *ngFor="let m of mensajes" 
+                       class="message-item mb-3"
+                       [class.own-message]="m.remitente_id === usuarioActual.id">
+                    <div class="message-bubble">
+                      <div class="message-header">
+                        <span *ngIf="m.remitente_id === usuarioActual.id" class="fw-bold text-primary">
+                          <i class="bi bi-person me-1"></i>Tú
+                        </span>
+                        <span *ngIf="m.remitente_id !== usuarioActual.id" class="fw-bold text-secondary">
+                          <i class="bi bi-person me-1"></i>Usuario {{m.remitente_id}}
+                        </span>
+                        <small class="text-muted ms-2">
+                          <i class="bi bi-clock me-1"></i>
+                          {{m.fecha_envio | date:'short'}}
+                        </small>
+                      </div>
+                      <div class="message-content">
+                        {{m.contenido}}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <ng-template #sinMensajes>
+                  <div class="empty-state">
+                    <i class="bi bi-chat"></i>
+                    <p>No hay mensajes</p>
+                  </div>
+                </ng-template>
+              </div>
+
+              <!-- Formulario de nuevo mensaje -->
+              <div *ngIf="usuarioConversacion" class="mt-3">
+                <div class="input-group">
+                  <textarea class="form-control" 
+                            [(ngModel)]="nuevoMensaje" 
+                            placeholder="Escribe un mensaje..."
+                            rows="2"></textarea>
+                  <button class="btn btn-primary" 
+                          (click)="enviarMensaje()"
+                          [disabled]="!nuevoMensaje.trim()">
+                    <i class="bi bi-send"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="error" class="alert alert-danger mt-3">
+  <i class="bi bi-exclamation-triangle me-2"></i>
+  {{error}}
+</div> 

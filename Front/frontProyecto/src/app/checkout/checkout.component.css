@@ -1,0 +1,38 @@
+.progress-bar {
+  background: linear-gradient(90deg, #007bff, #28a745);
+  transition: width 0.3s ease;
+}
+
+.metodo-pago {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid #e9ecef;
+}
+
+.metodo-pago:hover {
+  border-color: #007bff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.metodo-pago.selected {
+  border-color: #28a745;
+  background-color: #f8fff9;
+}
+
+.icono-pago {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.card {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn {
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+} 

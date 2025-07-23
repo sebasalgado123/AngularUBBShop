@@ -1,0 +1,84 @@
+/* Estilos para el componente ProductDetail */
+.product-image-container {
+  text-align: center;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-detail-image {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+}
+
+.no-image-placeholder {
+  color: #ccc;
+  text-align: center;
+}
+
+.product-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.price-section {
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 1rem;
+}
+
+.description-section,
+.contact-section,
+.details-section {
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 1rem;
+}
+
+.action-buttons {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.breadcrumb {
+  background-color: transparent;
+  padding: 0;
+}
+
+.breadcrumb-item a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+  color: #6c757d;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .product-title {
+    font-size: 1.5rem;
+  }
+  
+  .product-image-container {
+    min-height: 200px;
+  }
+  
+  .action-buttons {
+    text-align: center;
+  }
+  
+  .action-buttons .btn {
+    margin-bottom: 0.5rem;
+    width: 100%;
+  }
+} 

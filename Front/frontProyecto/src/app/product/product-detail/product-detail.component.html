@@ -1,0 +1,231 @@
+<!-- Loading spinner -->
+<div *ngIf="loading" class="text-center py-5">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Cargando...</span>
+  </div>
+  <p class="mt-3">Cargando producto...</p>
+</div>
+
+<!-- Error message -->
+<div *ngIf="error && !loading" class="text-center py-5">
+  <i class="bi bi-exclamation-triangle" style="font-size: 4rem; color: #dc3545;"></i>
+  <h4 class="text-danger mt-3">{{error}}</h4>
+  <button class="btn btn-primary mt-3" (click)="volverAlListado()">
+    <i class="bi bi-arrow-left me-2"></i>
+    Volver al listado
+  </button>
+</div>
+
+<!-- Product details -->
+<div *ngIf="product && !loading" class="row">
+  <div class="col-12">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="#" (click)="volverAlListado(); $event.preventDefault()">
+            <i class="bi bi-house me-1"></i>
+            Inicio
+          </a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="#" (click)="volverAlListado(); $event.preventDefault()">Productos</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{product.titulo}}</li>
+      </ol>
+    </nav>
+
+    <!-- Product card -->
+    <div class="card shadow-lg">
+      <div class="card-body p-4">
+        <div class="row">
+          <!-- Product image -->
+          <div class="col-md-6 mb-4">
+            <div class="product-image-container">
+              <img *ngIf="product.imageUrl" 
+                   [src]="product.imageUrl" 
+                   [alt]="product.titulo"
+                   class="img-fluid rounded product-detail-image"
+                   (error)="onImageError($event)">
+              <div *ngIf="!product.imageUrl" class="no-image-placeholder">
+                <i class="bi bi-image" style="font-size: 4rem; color: #ccc;"></i>
+                <p class="text-muted">Sin imagen</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product info -->
+          <div class="col-md-6">
+            <div class="product-info">
+              <h1 class="product-title mb-3">{{product.titulo}}</h1>
+              
+              <div class="mb-3">
+                <span class="badge bg-primary me-2">{{getCategoriaNombre(product.categoria_id)}}</span>
+                <span class="badge" [class]="product.disponibilidad ? 'bg-success' : 'bg-danger'">
+                  {{product.disponibilidad ? 'Disponible' : 'Vendido'}}
+                </span>
+              </div>
+
+              <div class="price-section mb-4">
+                <h2 class="text-primary mb-0">{{getFormattedPrice(product.precio)}}</h2>
+              </div>
+
+              <div class="description-section mb-4">
+                <h5>Descripción</h5>
+                <p class="text-muted">{{product.descripcion}}</p>
+              </div>
+
+              <div class="contact-section mb-4">
+                <h5>Información de contacto</h5>
+                <p class="text-muted">
+                  <i class="bi bi-person me-2"></i>
+                  {{product.info_contacto}}
+                </p>
+              </div>
+
+              <div class="details-section mb-4">
+                <h5>Detalles adicionales</h5>
+                <ul class="list-unstyled text-muted">
+                  <li>
+                    <i class="bi bi-calendar me-2"></i>
+                    Publicado el {{getFormattedDate(product.fecha_creacion)}}
+                  </li>
+                  <li *ngIf="product.fecha_modificacion">
+                    <i class="bi bi-pencil me-2"></i>
+                    Última modificación: {{getFormattedDate(product.fecha_modificacion)}}
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Action buttons -->
+              <div class="action-buttons">
+                <button class="btn btn-primary me-2" (click)="volverAlListado()">
+                  <i class="bi bi-arrow-left me-1"></i>
+                  Volver al listado
+                </button>
+                
+                <button *ngIf="isLoggedIn && product?.usuario_id !== currentUserId" 
+                        class="btn btn-success me-2" 
+                        (click)="abrirMensaje()">
+                  <i class="bi bi-chat-dots me-1"></i>
+                  Enviar mensaje
+                </button>
+                
+                <button *ngIf="isLoggedIn" 
+                        class="btn btn-warning" 
+                        (click)="abrirReporte()">
+                  <i class="bi bi-flag me-1"></i>
+                  Reportar publicación
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de mensaje -->
+<div class="modal fade" tabindex="-1" [ngClass]="{ 'show d-block': mostrarModalMensaje }" *ngIf="mostrarModalMensaje">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-chat-dots me-2"></i>
+          Enviar mensaje
+        </h5>
+        <button type="button" class="btn-close" (click)="cerrarModalMensaje()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>
+          Envía un mensaje al vendedor sobre este producto.
+        </div>
+        
+        <!-- Información del producto -->
+        <div class="card mb-3">
+          <div class="card-body">
+            <h6 class="card-title">
+              <i class="bi bi-box me-2"></i>
+              Producto: {{product?.titulo}}
+            </h6>
+            <p class="card-text text-muted mb-1">
+              <i class="bi bi-currency-dollar me-1"></i>
+              Precio: {{product?.precio | currency:'CLP'}}
+            </p>
+            <p class="card-text text-muted mb-0">
+              <i class="bi bi-person me-1"></i>
+              Vendedor: Usuario ID {{product?.usuario_id}}
+            </p>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label fw-bold">
+            <i class="bi bi-chat-dots me-1"></i>
+            Tu mensaje:
+          </label>
+          <textarea class="form-control" 
+                    [(ngModel)]="mensajeTexto" 
+                    rows="4"
+                    placeholder="Escribe tu consulta sobre este producto..."></textarea>
+        </div>
+        <div *ngIf="mensajeMensaje" class="alert" [class]="mensajeMensaje.includes('correctamente') ? 'alert-success' : 'alert-danger'">
+          {{mensajeMensaje}}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalMensaje()">
+          <i class="bi bi-x-circle me-1"></i>
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-success" (click)="enviarMensaje()" [disabled]="!mensajeTexto.trim()">
+          <i class="bi bi-send me-1"></i>
+          Enviar mensaje
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de reporte -->
+<div class="modal fade" tabindex="-1" [ngClass]="{ 'show d-block': mostrarModalReporte }" *ngIf="mostrarModalReporte">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title">
+          <i class="bi bi-flag me-2"></i>
+          Reportar publicación
+        </h5>
+        <button type="button" class="btn-close" (click)="cerrarModalReporte()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>
+          Ayúdanos a mantener la calidad de las publicaciones reportando contenido inapropiado.
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold">Motivo del reporte:</label>
+          <textarea class="form-control" 
+                    [(ngModel)]="motivoReporte" 
+                    rows="4"
+                    placeholder="Describe el motivo del reporte..."></textarea>
+        </div>
+        <div *ngIf="mensajeReporte" class="alert" [class]="mensajeReporte.includes('correctamente') ? 'alert-success' : 'alert-danger'">
+          {{mensajeReporte}}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalReporte()">
+          <i class="bi bi-x-circle me-1"></i>
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-warning" (click)="enviarReporte()" [disabled]="!motivoReporte.trim()">
+          <i class="bi bi-flag me-1"></i>
+          Enviar reporte
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 

@@ -1,0 +1,269 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card shadow-lg">
+      <div class="card-header">
+        <h3 class="mb-0">
+          <i class="bi bi-shield-check me-2"></i>
+          Panel de Administración
+        </h3>
+        <p class="mb-0 mt-2">Bienvenido, administrador. Aquí podrás gestionar usuarios, publicaciones y reportes.</p>
+      </div>
+      <div class="card-body">
+        
+        <!-- Mensajes de estado -->
+        <div *ngIf="mensaje" class="alert alert-success alert-dismissible fade show">
+          <i class="bi bi-check-circle me-2"></i>
+          {{mensaje}}
+          <button type="button" class="btn-close" (click)="limpiarMensajes()"></button>
+        </div>
+        
+        <div *ngIf="error" class="alert alert-danger alert-dismissible fade show">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          {{error}}
+          <button type="button" class="btn-close" (click)="limpiarMensajes()"></button>
+        </div>
+        
+        <!-- Estadísticas -->
+        <div class="row mb-4">
+          <div class="col-md-4 mb-3">
+            <div class="card bg-primary text-white">
+              <div class="card-body text-center">
+                <i class="bi bi-people" style="font-size: 2rem;"></i>
+                <h4 class="mt-2">{{usuarios.length}}</h4>
+                <p class="mb-0">Usuarios</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <div class="card bg-success text-white">
+              <div class="card-body text-center">
+                <i class="bi bi-box" style="font-size: 2rem;"></i>
+                <h4 class="mt-2">{{publicaciones.length}}</h4>
+                <p class="mb-0">Publicaciones</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <div class="card bg-warning text-dark">
+              <div class="card-body text-center">
+                <i class="bi bi-flag" style="font-size: 2rem;"></i>
+                <h4 class="mt-2">{{reportes.length}}</h4>
+                <p class="mb-0">Reportes</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Usuarios -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                  <i class="bi bi-people me-2"></i>
+                  Gestión de Usuarios
+                </h5>
+                <button class="btn btn-primary btn-sm" (click)="cargarUsuarios()" [disabled]="loading.usuarios">
+                  <i class="bi bi-arrow-clockwise me-1"></i>
+                  Actualizar
+                </button>
+              </div>
+              <div class="card-body">
+                <div *ngIf="loading.usuarios" class="text-center py-3">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                  </div>
+                  <p class="mt-2">Cargando usuarios...</p>
+                </div>
+                <div *ngIf="!loading.usuarios && usuarios.length" class="table-responsive">
+                  <table class="table table-hover">
+                    <thead class="table-light">
+                      <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let u of usuarios">
+                        <td><strong>#{{u.id_usuario}}</strong></td>
+                        <td>{{u.nombre}}</td>
+                        <td>{{u.email}}</td>
+                        <td>
+                          <span class="badge" [class]="u.rol === 'admin' ? 'bg-danger' : 'bg-primary'">
+                            {{u.rol}}
+                          </span>
+                        </td>
+                        <td>
+                          <div class="btn-group btn-group-sm">
+                            <!-- Botón cambiar rol -->
+                            <button class="btn btn-outline-primary" 
+                                    (click)="cambiarRol(u.id_usuario, u.rol === 'admin' ? 'usuario' : 'admin')"
+                                    [disabled]="esUltimoAdmin(u)"
+                                    [title]="esUltimoAdmin(u) ? 'No se puede quitar admin al último administrador' : 'Cambiar rol'">
+                              <i class="bi bi-person-gear me-1"></i>
+                              {{u.rol === 'admin' ? 'Quitar Admin' : 'Hacer Admin'}}
+                            </button>
+                            
+                            <!-- Botón eliminar usuario -->
+                            <button class="btn btn-outline-danger" 
+                                    (click)="eliminarUsuario(u.id_usuario)"
+                                    [disabled]="esUltimoAdmin(u)"
+                                    [title]="esUltimoAdmin(u) ? 'No se puede eliminar el último administrador' : 'Eliminar usuario'">
+                              <i class="bi bi-trash me-1"></i>
+                              Eliminar
+                            </button>
+                          </div>
+                          
+                          <!-- Indicador de último admin -->
+                          <div *ngIf="esUltimoAdmin(u)" class="mt-1">
+                            <small class="text-warning">
+                              <i class="bi bi-exclamation-triangle me-1"></i>
+                              Último administrador
+                            </small>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div *ngIf="!loading.usuarios && !usuarios.length" class="empty-state">
+                  <i class="bi bi-people"></i>
+                  <p>No hay usuarios registrados</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Publicaciones -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                  <i class="bi bi-collection me-2"></i>
+                  Gestión de Publicaciones
+                </h5>
+                <button class="btn btn-primary btn-sm" (click)="cargarPublicaciones()" [disabled]="loading.publicaciones">
+                  <i class="bi bi-arrow-clockwise me-1"></i>
+                  Actualizar
+                </button>
+              </div>
+              <div class="card-body">
+                <div *ngIf="loading.publicaciones" class="text-center py-3">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                  </div>
+                  <p class="mt-2">Cargando publicaciones...</p>
+                </div>
+                <div *ngIf="!loading.publicaciones && publicaciones.length" class="table-responsive">
+                  <table class="table table-hover">
+                    <thead class="table-light">
+                      <tr>
+                        <th>ID</th>
+                        <th>Título</th>
+                        <th>Descripción</th>
+                        <th>Precio</th>
+                        <th>Usuario</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let p of publicaciones">
+                        <td><strong>#{{p.id}}</strong></td>
+                        <td>{{p.titulo}}</td>
+                        <td>{{p.descripcion | slice:0:50}}{{p.descripcion?.length > 50 ? '...' : ''}}</td>
+                        <td><strong>{{p.precio | currency:'CLP'}}</strong></td>
+                        <td>Usuario {{p.usuario_id}}</td>
+                        <td>
+                          <span class="badge" [class]="p.disponibilidad ? 'bg-success' : 'bg-danger'">
+                            {{p.disponibilidad ? 'Disponible' : 'Vendido'}}
+                          </span>
+                        </td>
+                        <td>
+                          <button class="btn btn-danger btn-sm" 
+                                  (click)="eliminarPublicacion(p.id)"
+                                  title="Eliminar publicación">
+                            <i class="bi bi-trash me-1"></i>
+                            Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div *ngIf="!loading.publicaciones && !publicaciones.length" class="empty-state">
+                  <i class="bi bi-collection"></i>
+                  <p>No hay publicaciones</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reportes -->
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                  <i class="bi bi-flag me-2"></i>
+                  Reportes de Publicaciones
+                </h5>
+                <button class="btn btn-primary btn-sm" (click)="cargarReportes()" [disabled]="loading.reportes">
+                  <i class="bi bi-arrow-clockwise me-1"></i>
+                  Actualizar
+                </button>
+              </div>
+              <div class="card-body">
+                <div *ngIf="loading.reportes" class="text-center py-3">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                  </div>
+                  <p class="mt-2">Cargando reportes...</p>
+                </div>
+                <div *ngIf="!loading.reportes && reportes.length" class="table-responsive">
+                  <table class="table table-hover">
+                    <thead class="table-light">
+                      <tr>
+                        <th>ID Reporte</th>
+                        <th>ID Publicación</th>
+                        <th>Título</th>
+                        <th>Motivo</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let r of reportes">
+                        <td><strong>#{{r.id_reporte}}</strong></td>
+                        <td>{{r.id_producto}}</td>
+                        <td>{{r.titulo}}</td>
+                        <td>{{r.motivo}}</td>
+                        <td>
+                          <button class="btn btn-danger btn-sm" 
+                                  (click)="eliminarPublicacion(r.id_producto)"
+                                  title="Eliminar publicación reportada">
+                            <i class="bi bi-trash me-1"></i>
+                            Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div *ngIf="!loading.reportes && !reportes.length" class="empty-state">
+                  <i class="bi bi-flag"></i>
+                  <p>No hay reportes pendientes</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

@@ -60,7 +60,10 @@ export class ProductoFormComponent implements OnInit {
         precio: prod.precio,
         info_contacto: prod.info_contacto,
       });
-      this.imagenesPreview = prod.imagenes || [];
+      // Si el producto tiene una imagen, mostrarla en el preview
+      if (prod.imageUrl) {
+        this.imagenesPreview = [prod.imageUrl];
+      }
     });
   }
 

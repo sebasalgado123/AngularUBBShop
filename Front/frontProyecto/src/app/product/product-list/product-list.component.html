@@ -1,46 +1,106 @@
-<!--Tabla HTML-->
-<div class="card border-primary mb-3 text-center">
-    <div class="card-header">Lista de Productos</div>
-    <div class="card-body text-primary">
-      <div class="table-responsive">
-        <table class="table" *ngIf="products && products.length">
-          <thead>
-            <tr>
-              <th>
-                <button class="btn btn-primary" (click)="toggleImage()">
-                  <i class="fa fa-eye"></i>
-                  {{showImage ? 'Ocultar ' : 'Mostrar '}}Imagenes
-                </button>      
-              </th>
-              <th>Producto</th>
-              <th>Descripcion</th>
-              <th>Precio</th>
-              <th>Contacto</th>
-              <th>Disponibilidad</th>
-              <th>Fecha publicacion</th>
-              <th>Ultima modificacion</th>
-            </tr>
-          </thead>
-          <thead>
-            <tr *ngFor="let product of products">
-              <td>
-                <img *ngIf="showImage"
-                [src]='product.imageUrl'
-                [title]='product.titulo'
-                [style.width.px]='imageWidth'
-                [style.margin.px]='imageMargin'
-                >
-              </td>
-              <td>{{product.titulo}}</td>
-              <td>{{product.descripcion}}</td>
-              <td>{{product.precio}}</td>
-              <td>{{product.contacto}}</td>
-              <td>{{product.disponibilidad}}</td>
-              <td>{{product.fecha_creacion}}</td>  
-              <td>{{product.fecha_modificacion}}</td>
-            </tr>
-          </thead>
-        </table>
+<!-- Header de productos -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="mb-0">Productos disponibles</h2>
+      <button class="btn btn-outline-primary" (click)="toggleImage()">
+        <i class="bi" [class.bi-eye]="!showImage" [class.bi-eye-slash]="showImage"></i>
+        {{showImage ? 'Ocultar' : 'Mostrar'}} imágenes
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Grid de productos -->
+<div class="row g-4" *ngIf="products && products.length; else sinProductos">
+  <div class="col-md-6 col-lg-4" *ngFor="let product of products">
+    <div class="card h-100 shadow-sm product-card">
+      <div class="card-img-top-container" *ngIf="showImage && product.imageUrl">
+        <img [src]="product.imageUrl" 
+             [alt]="product.titulo"
+             class="card-img-top product-image"
+             (error)="onImageError($event)">
+      </div>
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title">{{product.titulo}}</h5>
+        <p class="card-text text-muted">{{getCategoriaNombre(product.categoria_id)}}</p>
+        <p class="card-text">{{product.descripcion}}</p>
+        <div class="mt-auto">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="h5 text-primary mb-0">{{product.precio | currency:'CLP'}}</span>
+            <span class="badge" [class]="product.disponibilidad ? 'bg-success' : 'bg-danger'">
+              {{product.disponibilidad ? 'Disponible' : 'Vendido'}}
+            </span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+              <i class="bi bi-calendar"></i>
+              {{product.fecha_creacion | date:'shortDate'}}
+            </small>
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-primary" (click)="verDetalles(product)">
+                Ver detalles
+              </button>
+              <button *ngIf="isLoggedIn && product.usuario_id !== currentUserId" 
+                      class="btn btn-success" 
+                      (click)="enviarMensajeRapido(product)"
+                      title="Enviar mensaje al vendedor sobre este producto">
+                <i class="bi bi-chat-dots"></i>
+                <span class="ms-1 d-none d-sm-inline">Mensaje</span>
+              </button>
+            </div>      
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+</div>
+
+<ng-template #sinProductos>
+  <div class="text-center py-5">
+    <i class="bi bi-box" style="font-size: 4rem; color: #ccc;"></i>
+    <h4 class="text-muted mt-3">No hay productos disponibles</h4>
+    <p class="text-muted">Intenta ajustar los filtros de búsqueda</p>
+  </div>
+</ng-template>
+
+<!-- Modal de reporte -->
+<div class="modal fade" tabindex="-1" [ngClass]="{ 'show d-block': mostrarModalReporte }" *ngIf="mostrarModalReporte">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title">
+          <i class="bi bi-flag me-2"></i>
+          Reportar publicación
+        </h5>
+        <button type="button" class="btn-close" (click)="cerrarModalReporte()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>
+          Ayúdanos a mantener la calidad de las publicaciones reportando contenido inapropiado.
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold">Motivo del reporte:</label>
+          <textarea class="form-control" 
+                    [(ngModel)]="motivoReporte" 
+                    rows="4"
+                    placeholder="Describe el motivo del reporte..."></textarea>
+        </div>
+        <div *ngIf="mensajeReporte" class="alert" [class]="mensajeReporte.includes('correctamente') ? 'alert-success' : 'alert-danger'">
+          {{mensajeReporte}}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalReporte()">
+          <i class="bi bi-x-circle me-1"></i>
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-warning" (click)="enviarReporte()" [disabled]="!motivoReporte.trim()">
+          <i class="bi bi-flag me-1"></i>
+          Enviar reporte
+        </button>
       </div>
     </div>
   </div>
+</div>

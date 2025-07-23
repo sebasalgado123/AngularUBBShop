@@ -1,19 +1,70 @@
-<h3 class="mb-4">Mis publicaciones</h3>
-
-<div *ngIf="!publicaciones.length" class="alert alert-info">No hay publicaciones.</div>
-
-<div class="row g-3">
-  <div class="col-md-4" *ngFor="let pub of publicaciones">
-    <div class="card h-100">
-      <img *ngIf="pub.imagenes?.length" [src]="pub.imagenes[0]" class="card-img-top" style="object-fit:cover;height:180px;" />
-      <div class="card-body d-flex flex-column">
-        <h5 class="card-title">{{ pub.titulo }}</h5>
-        <p class="card-text flex-grow-1">{{ pub.descripcion | slice:0:80 }}{{ pub.descripcion?.length > 80 ? '…' : '' }}</p>
-        <p class="fw-bold mb-2">{{ pub.precio | currency:'CLP' }}</p>
-        <div class="d-flex gap-2">
-          <button class="btn btn-outline-primary btn-sm" (click)="editar(pub.id)">Editar</button>
-          <button class="btn btn-outline-danger btn-sm" (click)="eliminar(pub.id)">Eliminar</button>
+<div class="row">
+  <div class="col-12">
+    <div class="card shadow-lg">
+      <div class="card-header">
+        <h3 class="mb-0">
+          <i class="bi bi-collection me-2"></i>
+          Mis Publicaciones
+        </h3>
+      </div>
+      <div class="card-body">
+        <div *ngIf="publicaciones.length; else sinPublicaciones">
+          <div class="row g-3">
+            <div class="col-md-6 col-lg-4" *ngFor="let pub of publicaciones">
+              <div class="card product-card h-100">
+                <img *ngIf="pub.imageUrl" 
+                     [src]="pub.imageUrl" 
+                     class="card-img-top" 
+                     style="object-fit:cover;height:180px;" 
+                     [alt]="pub.titulo" />
+                <div class="card-body d-flex flex-column">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0">{{ pub.titulo }}</h5>
+                    <span class="badge" 
+                          [class]="pub.disponibilidad ? 'bg-success' : 'bg-danger'">
+                      {{pub.disponibilidad ? 'Disponible' : 'Vendido'}}
+                    </span>
+                  </div>
+                  <p class="card-text flex-grow-1 text-muted">
+                    {{ pub.descripcion | slice:0:80 }}{{ pub.descripcion?.length > 80 ? '…' : '' }}
+                  </p>
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-bold text-primary">
+                      <i class="bi bi-currency-dollar me-1"></i>
+                      {{ pub.precio | currency:'CLP' }}
+                    </span>
+                    <small class="text-muted">
+                      <i class="bi bi-calendar me-1"></i>
+                      {{pub.fecha_creacion | date:'short'}}
+                    </small>
+                  </div>
+                  <div class="d-flex gap-2 mt-auto">
+                    <button class="btn btn-primary btn-sm flex-fill" 
+                            (click)="editar(pub.id)">
+                      <i class="bi bi-pencil me-1"></i>
+                      Editar
+                    </button>
+                    <button class="btn btn-danger btn-sm flex-fill" 
+                            (click)="eliminar(pub.id)">
+                      <i class="bi bi-trash me-1"></i>
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+        <ng-template #sinPublicaciones>
+          <div class="empty-state">
+            <i class="bi bi-collection"></i>
+            <p>No tienes publicaciones</p>
+            <a routerLink="/publicar" class="btn btn-primary">
+              <i class="bi bi-plus-circle me-2"></i>
+              Crear primera publicación
+            </a>
+          </div>
+        </ng-template>
       </div>
     </div>
   </div>

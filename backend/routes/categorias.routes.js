@@ -24,7 +24,7 @@ router.get('/', (req, res) => {
       console.log('Tablas disponibles:', tables);
 
       // Obtener las categorías
-      connection.query('SELECT id_categorias AS id, nombre FROM categorias', (err, results) => {
+      connection.query('SELECT id_categoria AS id, nombre FROM categoria', (err, results) => {
         connection.release(); 
 
         if (err) {
